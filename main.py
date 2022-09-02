@@ -15,7 +15,7 @@ fps = 60
 screen_width = 1400
 screen_height = 800
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("game")
+pygame.display.set_caption("Alien Platformer")
 
 
 font = pygame.font.SysFont("comicsans", 80)
@@ -31,28 +31,29 @@ score = 0
 level_score = 0
 magic_power = False
 button_used = False
+game_paused = False
 
 white = (255, 255, 255)
 red = (255, 0, 0)
 
 
-start_img = pygame.image.load("Base pack/liquidLava.png")
-exit_img = pygame.image.load("Base pack/flyDead.png")
-restart_img = pygame.image.load("Base pack/liquidLavaTop_mid.png")
+start_img = pygame.image.load("Base pack/button_start.png").convert_alpha()
+exit_img = pygame.image.load("Base pack/button_quit.png").convert_alpha()
+restart_img = pygame.image.load("Base pack/button_restart.png").convert_alpha()
 
 
 if level > 25:
-    bg = pygame.image.load("Base pack/bg.png")
+    bg = pygame.image.load("Base pack/bg.png").convert_alpha()
 elif level > 20:
-    bg = pygame.image.load("Base pack/bg_shroom.png")
+    bg = pygame.image.load("Base pack/bg_shroom.png").convert_alpha()
 elif level > 15:
-    bg = pygame.image.load("Base pack/bg.png")
+    bg = pygame.image.load("Base pack/bg.png").convert_alpha()
 elif level > 10:
-    bg = pygame.image.load("Base pack/bg_desert.png")
+    bg = pygame.image.load("Base pack/bg_desert.png").convert_alpha()
 elif level > 5:
-    bg = pygame.image.load("Base pack/bg_castle.png")
+    bg = pygame.image.load("Base pack/bg_castle.png").convert_alpha()
 else:
-    bg = pygame.image.load("Base pack/bg_grasslands.png")
+    bg = pygame.image.load("Base pack/bg_grasslands.png").convert_alpha()
 background = pygame.transform.scale(bg, (1400, 800))
 
 
@@ -61,6 +62,18 @@ jump_sound = pygame.mixer.Sound("Base pack/jumpsound.mp3")
 jump_sound.set_volume(0.5)
 death_sound = pygame.mixer.Sound("Base pack/deathsound.mp3")
 death_sound.set_volume(0.5)
+
+
+def pause():
+    game_paused = True
+    while game_paused:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    game_paused = False
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+
 
 
 def draw_text(text, font, text_col, x, y):
@@ -82,7 +95,6 @@ def reset_level(level):
     magic_group.empty()
     decoration_group.empty()
     fake_block_group.empty()
-    magic_power = False
     if path.exists(f"world_data{level}.pkl"):
         pickle_in = open(f"world_data{level}.pkl", "rb")
         world_data = pickle.load(pickle_in)
@@ -266,14 +278,14 @@ class Player():
         self.counter = 0
         for num in range(1, 11):
             if magic_power == False:
-                img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png")
+                img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
             else:
-                img_right = pygame.image.load(f"Base pack/p3_walk0{num}.png")
+                img_right = pygame.image.load(f"Base pack/p3_walk0{num}.png").convert_alpha()
             img_right = pygame.transform.scale(img_right, (40, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
             self.images_left.append(img_left)
-        self.dead_image = pygame.image.load("Base pack/cloud2.png")
+        self.dead_image = pygame.image.load("Base pack/cloud2.png").convert_alpha()
         self.image = self.images_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -293,23 +305,23 @@ class World():
         self.tile_list = []
 
         if level > 25:
-            dirt_img = pygame.image.load("Base pack/cakeCenter.png")
-            grass_img = pygame.image.load("Base pack/cake.png")
+            dirt_img = pygame.image.load("Base pack/cakeCenter.png").convert_alpha()
+            grass_img = pygame.image.load("Base pack/cake.png").convert_alpha()
         elif level > 20:
-            dirt_img = pygame.image.load("Base pack/dirtCenter.png")
-            grass_img = pygame.image.load("Base pack/dirt.png")
+            dirt_img = pygame.image.load("Base pack/dirtCenter.png").convert_alpha()
+            grass_img = pygame.image.load("Base pack/dirt.png").convert_alpha()
         elif level > 15:
-            dirt_img = pygame.image.load("Base pack/iceWaterDeepStars.png")
-            grass_img = pygame.image.load("Base pack/iceBlock.png")
+            dirt_img = pygame.image.load("Base pack/iceWaterDeepStars.png").convert_alpha()
+            grass_img = pygame.image.load("Base pack/iceBlock.png").convert_alpha()
         elif level > 10:
-            dirt_img = pygame.image.load("Tiles/grassCenter.png")
-            grass_img = pygame.image.load("Base pack/sand.png")
+            dirt_img = pygame.image.load("Base pack/grassCenter.png").convert_alpha()
+            grass_img = pygame.image.load("Base pack/sand.png").convert_alpha()
         elif level > 5:
-            dirt_img = pygame.image.load("Tiles/castleCenter.png")
-            grass_img = pygame.image.load("Tiles/castle.png")
+            dirt_img = pygame.image.load("Base pack/castleCenter.png").convert_alpha()
+            grass_img = pygame.image.load("Base pack/castle.png").convert_alpha()
         else:
-            dirt_img = pygame.image.load("Tiles/grassCenter.png")
-            grass_img = pygame.image.load("Tiles/grass.png")
+            dirt_img = pygame.image.load("Base pack/grassCenter.png").convert_alpha()
+            grass_img = pygame.image.load("Base pack/grass.png").convert_alpha()
 
         row_count = 0
         for row in data:
@@ -399,17 +411,17 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         if level > 25:
-            self.image = pygame.image.load("Base pack/worm.png")
+            self.image = pygame.image.load("Base pack/worm.png").convert_alpha()
         elif level > 20:
-            self.image = pygame.image.load("Base pack/snail.png")
+            self.image = pygame.image.load("Base pack/snail.png").convert_alpha()
         elif level > 15:
-            self.image = pygame.image.load("Base pack/fishPink.png")
+            self.image = pygame.image.load("Base pack/fishPink.png").convert_alpha()
         elif level > 10:
-            self.image = pygame.image.load("Base pack/bee.png")
+            self.image = pygame.image.load("Base pack/bee.png").convert_alpha()
         elif level > 5:
-            self.image = pygame.image.load("Base pack/bat.png")
+            self.image = pygame.image.load("Base pack/bat.png").convert_alpha()
         else:
-            self.image = pygame.image.load("Base pack/flyFly1.png")
+            self.image = pygame.image.load("Base pack/flyFly1.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.flipped = pygame.transform.flip(self.image, True, False)
         self.rect.x = x
@@ -427,17 +439,17 @@ class Enemy(pygame.sprite.Sprite):
             self.image = self.flipped
         else:
             if level > 25:
-                self.image = pygame.image.load("Base pack/worm_walk.png")
+                self.image = pygame.image.load("Base pack/worm_walk.png").convert_alpha()
             elif level > 20:
-                self.image = pygame.image.load("Base pack/snail_walk.png")
+                self.image = pygame.image.load("Base pack/snail_walk.png").convert_alpha()
             elif level > 15:
-                self.image = pygame.image.load("Base pack/fishPink_swim.png")
+                self.image = pygame.image.load("Base pack/fishPink_swim.png").convert_alpha()
             elif level > 10:
-                self.image = pygame.image.load("Base pack/bee_fly.png")
+                self.image = pygame.image.load("Base pack/bee_fly.png").convert_alpha()
             elif level > 5:
-                self.image = pygame.image.load("Base pack/bat_fly.png")
+                self.image = pygame.image.load("Base pack/bat_fly.png").convert_alpha()
             else:
-                self.image = pygame.image.load("Base pack/flyFly2.png")
+                self.image = pygame.image.load("Base pack/flyFly2.png").convert_alpha()
 
 
 
@@ -445,15 +457,15 @@ class Enemy2(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         if level > 20:
-            self.image = pygame.image.load("Base pack/barnacle.png")
+            self.image = pygame.image.load("Base pack/barnacle.png").convert_alpha()
         elif level > 15:
-            self.image = pygame.image.load("Base pack/spikesBottomAlt.png")
+            self.image = pygame.image.load("Base pack/spikesBottomAlt.png").convert_alpha()
         elif level > 10:
-            self.image = pygame.image.load("Base pack/spikes.png")
+            self.image = pygame.image.load("Base pack/spikes.png").convert_alpha()
         elif level > 5:
-            self.image = pygame.image.load("Base pack/spinner.png")
+            self.image = pygame.image.load("Base pack/spinner.png").convert_alpha()
         else:
-            self.image = pygame.image.load("Base pack/blockerMad.png")
+            self.image = pygame.image.load("Base pack/blockerMad.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.flipped = pygame.transform.flip(self.image, True, False)
         self.rect.x = x
@@ -482,17 +494,17 @@ class Enemy4(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         if level > 25:
-            self.image = pygame.image.load("Base pack/slimeGreen_squashed.png")
+            self.image = pygame.image.load("Base pack/slimeGreen_squashed.png").convert_alpha()
         elif level > 20:
-            self.image = pygame.image.load("Base pack/frog.png")
+            self.image = pygame.image.load("Base pack/frog.png").convert_alpha()
         elif level > 15:
-            self.image = pygame.image.load("Base pack/slimeBlue_squashed.png")
+            self.image = pygame.image.load("Base pack/slimeBlue_squashed.png").convert_alpha()
         elif level > 10:
-            self.image = pygame.image.load("Base pack/spider.png")
+            self.image = pygame.image.load("Base pack/spider.png").convert_alpha()
         elif level > 5:
-            self.image = pygame.image.load("Base pack/spinner.png")
+            self.image = pygame.image.load("Base pack/spinner.png").convert_alpha()
         else:
-            self.image = pygame.image.load("Base pack/blockerMad.png")
+            self.image = pygame.image.load("Base pack/blockerMad.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.flipped = pygame.transform.flip(self.image, True, False)
         self.rect.x = x
@@ -518,34 +530,34 @@ class Enemy4(pygame.sprite.Sprite):
             self.move_counter += 2
             self.move -= 2
             if level > 25:
-                self.image = pygame.image.load("Base pack/slimeGreen.png")
+                self.image = pygame.image.load("Base pack/slimeGreen.png").convert_alpha()
             elif level > 20:
-                self.image = pygame.image.load("Base pack/frog_leap.png")
+                self.image = pygame.image.load("Base pack/frog_leap.png").convert_alpha()
             elif level > 15:
-                self.image = pygame.image.load("Base pack/slimeBlue.png")
+                self.image = pygame.image.load("Base pack/slimeBlue.png").convert_alpha()
             elif level > 10:
-                self.image = pygame.image.load("Base pack/spider_walk2.png")
+                self.image = pygame.image.load("Base pack/spider_walk2.png").convert_alpha()
             elif level > 5:
-                self.image = pygame.image.load("Base pack/spinner_spin.png")
+                self.image = pygame.image.load("Base pack/spinner_spin.png").convert_alpha()
             else:
-                self.image = pygame.image.load("Base pack/blockerMad.png")
+                self.image = pygame.image.load("Base pack/blockerMad.png").convert_alpha()
 
         if self.move == 220:
             self.position_counter = False
         if self.move == 0:
             self.position_counter = True
             if level > 25:
-                self.image = pygame.image.load("Base pack/slimeGreen_squashed.png")
+                self.image = pygame.image.load("Base pack/slimeGreen_squashed.png").convert_alpha()
             elif level > 20:
-                self.image = pygame.image.load("Base pack/frog.png")
+                self.image = pygame.image.load("Base pack/frog.png").convert_alpha()
             elif level > 15:
-                self.image = pygame.image.load("Base pack/slimeBlue_squashed.png")
+                self.image = pygame.image.load("Base pack/slimeBlue_squashed.png").convert_alpha()
             elif level > 10:
-                self.image = pygame.image.load("Base pack/spider.png")
+                self.image = pygame.image.load("Base pack/spider.png").convert_alpha()
             elif level > 5:
-                self.image = pygame.image.load("Base pack/spinner.png")
+                self.image = pygame.image.load("Base pack/spinner.png").convert_alpha()
             else:
-                self.image = pygame.image.load("Base pack/blockerMad.png")
+                self.image = pygame.image.load("Base pack/blockerMad.png").convert_alpha()
 
 
 
@@ -556,17 +568,17 @@ class Enemy3(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         if level > 25:
-            self.image = pygame.image.load("Base pack/slime_walk.png")
+            self.image = pygame.image.load("Base pack/slime_walk.png").convert_alpha()
         elif level > 20:
-            self.image = pygame.image.load("Base pack/ladyBug.png")
+            self.image = pygame.image.load("Base pack/ladyBug.png").convert_alpha()
         elif level > 15:
-            self.image = pygame.image.load("Base pack/piranha_down.png")
+            self.image = pygame.image.load("Base pack/piranha_down.png").convert_alpha()
         elif level > 10:
-            self.image = pygame.image.load("Base pack/bee.png")
+            self.image = pygame.image.load("Base pack/bee.png").convert_alpha()
         elif level > 5:
-            self.image = pygame.image.load("Base pack/bat.png")
+            self.image = pygame.image.load("Base pack/bat.png").convert_alpha()
         else:
-            self.image = pygame.image.load("Base pack/flyFly1.png")
+            self.image = pygame.image.load("Base pack/flyFly1.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.flipped = pygame.transform.flip(self.image, True, False)
         self.rect.x = x
@@ -584,24 +596,24 @@ class Enemy3(pygame.sprite.Sprite):
             self.image = self.flipped
         else:
             if level > 25:
-                self.image = pygame.image.load("Base pack/slime.png")
+                self.image = pygame.image.load("Base pack/slime.png").convert_alpha()
             elif level > 20:
-                self.image = pygame.image.load("Base pack/ladyBug_fly.png")
+                self.image = pygame.image.load("Base pack/ladyBug_fly.png").convert_alpha()
             elif level > 15:
-                self.image = pygame.image.load("Base pack/piranha.png")
+                self.image = pygame.image.load("Base pack/piranha.png").convert_alpha()
             elif level > 10:
-                self.image = pygame.image.load("Base pack/bee_fly.png")
+                self.image = pygame.image.load("Base pack/bee_fly.png").convert_alpha()
             elif level > 5:
-                self.image = pygame.image.load("Base pack/bat_fly.png")
+                self.image = pygame.image.load("Base pack/bat_fly.png").convert_alpha()
             else:
-                self.image = pygame.image.load("Base pack/flyFly2.png")
+                self.image = pygame.image.load("Base pack/flyFly2.png").convert_alpha()
 
 
 
 class Ghost(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("Base pack/ghost.png")
+        self.image = pygame.image.load("Base pack/ghost.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.flipped = pygame.transform.flip(self.image, True, False)
         self.rect.x = x
@@ -628,17 +640,17 @@ class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, move_x, move_y):
         pygame.sprite.Sprite.__init__(self)
         if level > 25:
-            img = pygame.image.load("Base pack/cakeHalfAlt.png")
+            img = pygame.image.load("Base pack/cakeHalfAlt.png").convert_alpha()
         elif level > 20:
-            img = pygame.image.load("Base pack/dirtHalf.png")
+            img = pygame.image.load("Base pack/dirtHalf.png").convert_alpha()
         elif level > 15:
-            img = pygame.image.load("Base pack/iceBlockHalf.png")
+            img = pygame.image.load("Base pack/iceBlockHalf.png").convert_alpha()
         elif level > 10:
-            img = pygame.image.load("Base pack/sandHalf.png")
+            img = pygame.image.load("Base pack/sandHalf.png").convert_alpha()
         elif level > 5:
-            img = pygame.image.load("Base pack/castleHalf.png")
+            img = pygame.image.load("Base pack/castleHalf.png").convert_alpha()
         else:
-            img = pygame.image.load("Base pack/grassHalf.png")
+            img = pygame.image.load("Base pack/grassHalf.png").convert_alpha()
         self.image = pygame.transform.scale(img, (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -677,17 +689,17 @@ class Fake_block(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         if level > 25:
-            img = pygame.image.load("Base pack/cake.png")
+            img = pygame.image.load("Base pack/cake.png").convert_alpha()
         elif level > 20:
-            img = pygame.image.load("Base pack/dirt.png")
+            img = pygame.image.load("Base pack/dirt.png").convert_alpha()
         elif level > 15:
-            img = pygame.image.load("Base pack/iceBlock.png")
+            img = pygame.image.load("Base pack/iceBlock.png").convert_alpha()
         elif level > 10:
-            img = pygame.image.load("Base pack/sand.png")
+            img = pygame.image.load("Base pack/sand.png").convert_alpha()
         elif level > 5:
-            img = pygame.image.load("Tiles/castle.png")
+            img = pygame.image.load("Base pack/castle.png").convert_alpha()
         else:
-            img = pygame.image.load("Tiles/grass.png")
+            img = pygame.image.load("Base pack/grass.png").convert_alpha()
         self.image = pygame.transform.scale(img, (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -698,17 +710,17 @@ class Decoration(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         if level > 25:
-            img = pygame.image.load("Base pack/creamChoco.png")
+            img = pygame.image.load("Base pack/creamChoco.png").convert_alpha()
         elif level > 20:
-            img = pygame.image.load("Base pack/tallShroom_red.png")
+            img = pygame.image.load("Base pack/tallShroom_red.png").convert_alpha()
         elif level > 15:
-            img = pygame.image.load("Base pack/deadTree.png")
+            img = pygame.image.load("Base pack/deadTree.png").convert_alpha()
         elif level > 10:
-            img = pygame.image.load("Base pack/cactus.png")
+            img = pygame.image.load("Base pack/cactus.png").convert_alpha()
         elif level > 5:
-            img = pygame.image.load("Base pack/tochLit.png")
+            img = pygame.image.load("Base pack/tochLit.png").convert_alpha()
         else:
-            img = pygame.image.load("Base pack/plant.png")
+            img = pygame.image.load("Base pack/plant.png").convert_alpha()
         self.image = pygame.transform.scale(img, (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -723,25 +735,14 @@ class Magic(pygame.sprite.Sprite):
 
 
         if button_used == False:
-            magic_img = pygame.image.load("Base pack/buttonRed.png")
+            magic_img = pygame.image.load("Base pack/buttonRed.png").convert_alpha()
         if button_used == True:
-            magic_img = pygame.image.load("Base pack/buttonRed_pressed.png")
+            magic_img = pygame.image.load("Base pack/buttonRed_pressed.png").convert_alpha()
         self.images = [magic_img]
         self.image = pygame.transform.scale(self.images[0], (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-
-    def update(self):
-        if button_used == False:
-            magic_img = pygame.image.load("Base pack/buttonRed.png")
-        if button_used == True:
-            magic_img = pygame.image.load("Base pack/buttonRed_pressed.png")
-
-
-
-
-
 
 
 
@@ -749,7 +750,7 @@ class Magic(pygame.sprite.Sprite):
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("Base pack/coinGold.png")
+        img = pygame.image.load("Base pack/coinGold.png").convert_alpha()
         self.image = pygame.transform.scale(img, (tile_size // 2, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -760,7 +761,7 @@ class Coin(pygame.sprite.Sprite):
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("Base pack/signExit.png")
+        img = pygame.image.load("Base pack/signExit.png").convert_alpha()
         self.image = pygame.transform.scale(img, (tile_size, int(tile_size * 1.5)))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -793,9 +794,10 @@ if path.exists(f"world_data{level}.pkl"):
 world = World(world_data)
 
 
-restart_buttom = Button(screen_width // 2 - 50, screen_height // 2 + 100, restart_img)
-start_buttom = Button(screen_width // 2 - 200, screen_height // 2, start_img)
-exit_button = Button(screen_width // 2 + 150, screen_height // 2, exit_img)
+restart_buttom = Button(screen_width // 2 - 100, screen_height // 2 + 50, restart_img)
+start_buttom = Button(screen_width // 2 - 300, screen_height // 2 - 50, start_img)
+exit_button = Button(screen_width // 2 + 150, screen_height // 2 - 50, exit_img)
+
 
 run = True
 while run:
@@ -805,20 +807,22 @@ while run:
 
 
 
+
+
     if level > 25:
-        bg = pygame.image.load("Base pack/bg.png")
+        bg = pygame.image.load("Base pack/bg.png").convert_alpha()
     elif level > 20:
-        bg = pygame.image.load("Base pack/bg_shroom.png")
+        bg = pygame.image.load("Base pack/bg_shroom.png").convert_alpha()
     elif level > 15:
-        bg = pygame.image.load("Base pack/bg.png")
+        bg = pygame.image.load("Base pack/bg.png").convert_alpha()
     elif level > 10:
-        bg = pygame.image.load("Base pack/bg_desert.png")
+        bg = pygame.image.load("Base pack/bg_desert.png").convert_alpha()
     elif level > 5:
-        bg = pygame.image.load("Base pack/bg_castle.png")
+        bg = pygame.image.load("Base pack/bg_castle.png").convert_alpha()
     else:
-        bg = pygame.image.load("Base pack/bg_grasslands.png")
+        bg = pygame.image.load("Base pack/bg_grasslands.png").convert_alpha()
     background = pygame.transform.scale(bg, (1400, 800))
-    #foreground = background.set_alpha(50)
+
 
 
     if main_menu == True:
@@ -853,7 +857,7 @@ while run:
                     magic_power = True
                     Magic.images = []
 
-                    magic_img = pygame.image.load("Base pack/buttonRed_pressed.png")
+                    magic_img = pygame.image.load("Base pack/buttonRed_pressed.png").convert_alpha()
                     Magic.images = [magic_img]
                     Magic.image = pygame.transform.scale(Magic.images[0], (tile_size, tile_size))
                     Magic.rect = Magic.image.get_rect()
@@ -866,9 +870,9 @@ while run:
                     player.counter = 0
                     for num in range(1, 11):
                         if magic_power == False:
-                            img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png")
+                            img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
                         else:
-                            img_right = pygame.image.load(f"Base pack/p3_walk0{num}.png")
+                            img_right = pygame.image.load(f"Base pack/p3_walk0{num}.png").convert_alpha()
                         img_right = pygame.transform.scale(img_right, (40, 80))
                         img_left = pygame.transform.flip(img_right, True, False)
                         player.images_right.append(img_right)
@@ -883,7 +887,7 @@ while run:
             player.index = 0
             player.counter = 0
             for num in range(1, 11):
-                img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png")
+                img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
                 img_right = pygame.transform.scale(img_right, (40, 80))
                 img_left = pygame.transform.flip(img_right, True, False)
                 player.images_right.append(img_right)
@@ -935,7 +939,7 @@ while run:
                 player.index = 0
                 player.counter = 0
                 for num in range(1, 11):
-                    img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png")
+                    img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
                     img_right = pygame.transform.scale(img_right, (40, 80))
                     img_left = pygame.transform.flip(img_right, True, False)
                     player.images_right.append(img_right)
@@ -956,6 +960,12 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                pause()
+
+
+
 
     pygame.display.update()
 
