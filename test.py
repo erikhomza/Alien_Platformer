@@ -15,7 +15,7 @@ fps = 60
 screen_width = 1400
 screen_height = 800
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Alien Platformer")
+pygame.display.set_caption("game")
 
 
 font = pygame.font.SysFont("comicsans", 80)
@@ -32,19 +32,16 @@ level_score = 0
 magic_power = False
 button_used = False
 game_paused = False
-save_cooldown = 0
 
-transparent_white = (245, 245, 245, 0)
 white = (255, 255, 255)
 red = (255, 0, 0)
-black = (0, 0, 0)
 
 
-start_img = pygame.image.load("Base pack/button_start.png").convert_alpha()
-exit_img = pygame.image.load("Base pack/button_quit.png").convert_alpha()
-restart_img = pygame.image.load("Base pack/button_restart.png").convert_alpha()
-continue_img = pygame.image.load("Base pack/button_continue.png").convert_alpha()
-
+start_img = pygame.image.load("Base pack/liquidLava.png").convert_alpha()
+exit_img = pygame.image.load("Base pack/flyDead.png").convert_alpha()
+restart_img = pygame.image.load("Base pack/liquidLavaTop_mid.png").convert_alpha()
+resume_img = pygame.image.load("Base pack/button_resume.png").convert_alpha()
+quit_img = pygame.image.load("Base pack/button_quit.png").convert_alpha()
 
 if level > 25:
     bg = pygame.image.load("Base pack/bg.png").convert_alpha()
@@ -68,21 +65,6 @@ death_sound = pygame.mixer.Sound("Base pack/deathsound.mp3")
 death_sound.set_volume(0.5)
 
 
-def pause(run):
-    game_paused = True
-    draw_text("GAME PAUSED", font, white, (screen_width // 2) - 280, (screen_height // 2) - 80)
-    pygame.display.update()
-    while game_paused:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_paused = False
-                run = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    game_paused = False
-    return run
-
-
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
@@ -102,7 +84,7 @@ def reset_level(level):
     magic_group.empty()
     decoration_group.empty()
     fake_block_group.empty()
-    coin_group.add(score_coin)
+    magic_power = False
     if path.exists(f"world_data{level}.pkl"):
         pickle_in = open(f"world_data{level}.pkl", "rb")
         world_data = pickle.load(pickle_in)
@@ -130,8 +112,11 @@ class Button():
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
 
+
         screen.blit(self.image, self.rect)
+
         return action
+
 
 
 class Player():
@@ -177,6 +162,7 @@ class Player():
                     self.image = self.images_left[self.index]
 
 
+
             if self.counter > walk_cooldown:
                 self.counter = 0
                 self.index += 1
@@ -188,10 +174,12 @@ class Player():
                     self.image = self.images_left[self.index]
 
 
+
             self.vel_y += 1
             if self.vel_y > 10:
                 self.vel_y = 10
             dy += self.vel_y
+
 
 
             self.in_air = True
@@ -259,6 +247,7 @@ class Player():
                         self.rect.x += platform.move_direction
 
 
+
             self.rect.x += dx
             self.rect.y += dy
 
@@ -297,6 +286,8 @@ class Player():
         self.jumped = False
         self.direction = 0
         self.in_air = True
+
+
 
 
 class World():
@@ -451,6 +442,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = pygame.image.load("Base pack/flyFly2.png").convert_alpha()
 
 
+
 class Enemy2(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -484,6 +476,8 @@ class Enemy2(pygame.sprite.Sprite):
                 if (player.rect.x - self.rect.x) < 150 and (player.rect.x - self.rect.x) > 0:
                     self.rect.x += 2
                     self.move_counter += 2
+
+
 
 
 class Enemy4(pygame.sprite.Sprite):
@@ -556,6 +550,10 @@ class Enemy4(pygame.sprite.Sprite):
                 self.image = pygame.image.load("Base pack/blockerMad.png").convert_alpha()
 
 
+
+
+
+
 class Enemy3(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -601,6 +599,7 @@ class Enemy3(pygame.sprite.Sprite):
                 self.image = pygame.image.load("Base pack/flyFly2.png").convert_alpha()
 
 
+
 class Ghost(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -623,6 +622,8 @@ class Ghost(pygame.sprite.Sprite):
                 self.rect.y -= 2
             elif (player.rect.y - self.rect.y) < 150 and (player.rect.y - self.rect.y) > 0:
                 self.rect.y += 2
+
+
 
 
 class Platform(pygame.sprite.Sprite):
@@ -659,13 +660,15 @@ class Platform(pygame.sprite.Sprite):
             self.move_direction *= -1
 
 
+
+
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         if level > 15 and level < 26:
-            img = pygame.image.load("Base pack/iceWater.png").convert_alpha()
+            img = pygame.image.load("Base pack/iceWater.png")
         else:
-            img = pygame.image.load("Base pack/liquidLavaTop_mid.png").convert_alpha()
+            img = pygame.image.load("Base pack/liquidLavaTop_mid.png")
         self.image = pygame.transform.scale(img, (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -714,23 +717,35 @@ class Decoration(pygame.sprite.Sprite):
         self.rect.y = y
 
 
+
+
 class Magic(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        magic_img = pygame.image.load("Base pack/buttonRed.png").convert_alpha()
 
-        self.image = pygame.transform.scale(magic_img, (tile_size, tile_size))
+
+        if button_used == False:
+            magic_img = pygame.image.load("Base pack/buttonRed.png").convert_alpha()
+        if button_used == True:
+            magic_img = pygame.image.load("Base pack/buttonRed_pressed.png").convert_alpha()
+        self.images = [magic_img]
+        self.image = pygame.transform.scale(self.images[0], (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
+    def update(self):
+        if button_used == False:
+            magic_img = pygame.image.load("Base pack/buttonRed.png").convert_alpha()
+        if button_used == True:
+            magic_img = pygame.image.load("Base pack/buttonRed_pressed.png").convert_alpha()
 
-    def change_image(self, x, y):
-        magic_img = pygame.image.load("Base pack/buttonRed_pressed.png").convert_alpha()
-        self.image = pygame.transform.scale(magic_img, (tile_size, tile_size))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+
+
+
+
+
+
 
 
 class Coin(pygame.sprite.Sprite):
@@ -743,6 +758,7 @@ class Coin(pygame.sprite.Sprite):
 
 
 
+
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -751,6 +767,9 @@ class Exit(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+
+
 
 
 player = Player(100, screen_height - 130)
@@ -776,11 +795,11 @@ if path.exists(f"world_data{level}.pkl"):
 world = World(world_data)
 
 
-restart_button = Button(screen_width // 2 - 100, screen_height // 2 + 50, restart_img)
-start_button = Button(screen_width // 2 - 300, screen_height // 2 - 50, start_img)
-exit_button = Button(screen_width // 2 + 150, screen_height // 2 - 50, exit_img)
-continue_button = Button(screen_width // 2 - 76, screen_height // 2 - 50, continue_img)
-
+restart_buttom = Button(screen_width // 2 - 50, screen_height // 2 + 100, restart_img)
+start_buttom = Button(screen_width // 2 - 200, screen_height // 2, start_img)
+exit_button = Button(screen_width // 2 + 150, screen_height // 2, exit_img)
+resume_button = button.Button(304, 125, resume_img)
+quit_button = button.Button(336, 375, quit_img)
 
 run = True
 while run:
@@ -788,135 +807,92 @@ while run:
     clock.tick(fps)
     screen.blit(background, (0, 0))
 
-    if level > 25:
-        bg = pygame.image.load("Base pack/bg.png").convert_alpha()
-    elif level > 20:
-        bg = pygame.image.load("Base pack/bg_shroom.png").convert_alpha()
-    elif level > 15:
-        bg = pygame.image.load("Base pack/bg.png").convert_alpha()
-    elif level > 10:
-        bg = pygame.image.load("Base pack/bg_desert.png").convert_alpha()
-    elif level > 5:
-        bg = pygame.image.load("Base pack/bg_castle.png").convert_alpha()
-    else:
-        bg = pygame.image.load("Base pack/bg_grasslands.png").convert_alpha()
-    background = pygame.transform.scale(bg, (1400, 800))
-
-
-    if main_menu == True:
-        pygame.draw.rect(screen, transparent_white, pygame.Rect(360, 100, 700, 120), 0, 15)
-        draw_text("Alien Platformer", font, black, (screen_width // 2) - 300, (screen_height // 2) - 300)
-        draw_text("uloženie hry: i", font_score, black, (screen_width // 2) - 300, (screen_height // 2) + 100)
-        draw_text("zastavenie hry: p", font_score, black, (screen_width // 2) - 300, (screen_height // 2) + 150)
-        draw_text("1.0.", font_score, white, (screen_width - 50), (screen_height - 50))
-        if exit_button.draw():
+    if game_paused == True:
+        if resume_button.draw(screen):
+            game_paused = False
+        if quit_button.draw(screen):
             run = False
-        if start_button.draw():
-            main_menu = False
-        if continue_button.draw():
-            if path.exists("saved_level.dat") and path.exists("saved_score.dat"):
-                level = pickle.load(open("saved_level.dat", "rb"))
-                score = pickle.load(open("saved_score.dat", "rb"))
-                world_data = []
-                world = reset_level(level)
-            main_menu = False
     else:
-        world.draw()
 
-        if game_over == 0:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    game_paused = True
+            if event.type == pygame.QUIT:
+                run = False
 
-            fly_group.update()
-            enemy2_group.update()
-            enemy3_group.update()
-            enemy4_group.update()
-            ghost_group.update()
-            platform_group.update()
-            magic_group.update()
-            fake_block_group.update()
-            if pygame.sprite.spritecollide(player, coin_group, True):
-                coin_sound.play()
-                score += 1
-                level_score += 1
-            draw_text("X " + str(score), font_score, white, tile_size - 10, 5)
-            draw_text("level " + str(level), font_score, white, 1270, 5)
-
-
-            if button_used == False:
-                if pygame.sprite.spritecollide(player, magic_group, False):
-                    button_used = True
-                    magic_power = True
-                    for magic in magic_group:
-                        magic.change_image(magic.rect.x, magic.rect.y)
-
-                    player.images_right = []
-                    player.images_left = []
-                    player.index = 0
-                    player.counter = 0
-                    for num in range(1, 11):
-                        if magic_power == False:
-                            img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
-                        else:
-                            img_right = pygame.image.load(f"Base pack/p3_walk0{num}.png").convert_alpha()
-                        img_right = pygame.transform.scale(img_right, (40, 80))
-                        img_left = pygame.transform.flip(img_right, True, False)
-                        player.images_right.append(img_right)
-                        player.images_left.append(img_left)
-
-        if pygame.key.get_pressed()[pygame.K_SPACE]:
-            magic_power = False
-            player.images_right = []
-            player.images_left = []
-            player.index = 0
-            player.counter = 0
-            for num in range(1, 11):
-                img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
-                img_right = pygame.transform.scale(img_right, (40, 80))
-                img_left = pygame.transform.flip(img_right, True, False)
-                player.images_right.append(img_right)
-                player.images_left.append(img_left)
+        if level > 25:
+            bg = pygame.image.load("Base pack/bg.png").convert_alpha()
+        elif level > 20:
+            bg = pygame.image.load("Base pack/bg_shroom.png").convert_alpha()
+        elif level > 15:
+            bg = pygame.image.load("Base pack/bg.png").convert_alpha()
+        elif level > 10:
+            bg = pygame.image.load("Base pack/bg_desert.png").convert_alpha()
+        elif level > 5:
+            bg = pygame.image.load("Base pack/bg_castle.png").convert_alpha()
+        else:
+            bg = pygame.image.load("Base pack/bg_grasslands.png").convert_alpha()
+        background = pygame.transform.scale(bg, (1400, 800))
 
 
-        fly_group.draw(screen)
-        enemy2_group.draw(screen)
-        enemy3_group.draw(screen)
-        enemy4_group.draw(screen)
-        ghost_group.draw(screen)
-        platform_group.draw(screen)
-        decoration_group.draw(screen)
-        lava_group.draw(screen)
-        coin_group.draw(screen)
-        exit_group.draw(screen)
-        magic_group.draw(screen)
-        fake_block_group.draw(screen)
-        draw_text("1.0.", font_score, white, (screen_width - 50), (screen_height - 50))
 
-        if save_cooldown > 0:
-            draw_text("GAME SAVED", font_score, white, (screen_width - 220), (screen_height - 100))
-            save_cooldown -= 1
+        if main_menu == True:
+            if exit_button.draw():
+                run = False
+            if start_buttom.draw():
+                main_menu = False
+        else:
+            world.draw()
 
-        game_over = player.update(game_over)
+            if game_over == 0:
 
-
-        if game_over == -1:
-            button_used = False
-            magic_power = False
-            death_sound.play()
-            if restart_button.draw():
-                world_data = []
-                world = reset_level(level)
-                game_over = 0
-                score -= level_score
-                level_score = 0
+                fly_group.update()
+                enemy2_group.update()
+                enemy3_group.update()
+                enemy4_group.update()
+                ghost_group.update()
+                platform_group.update()
+                magic_group.update()
+                fake_block_group.update()
+                if pygame.sprite.spritecollide(player, coin_group, True):
+                    coin_sound.play()
+                    score += 1
+                    level_score += 1
+                draw_text("X " + str(score), font_score, white, tile_size - 10, 10)
+                draw_text("level " + str(level), font_score, white, 1270, 10)
 
 
-        if game_over == 1:
-            button_used = False
-            level += 1
-            if level <= max_levels:
-                world_data = []
-                world = reset_level(level)
-                game_over = 0
-                level_score = 0
+                if button_used == False:
+                    if pygame.sprite.spritecollide(player, magic_group, False):
+                        button_used = True
+                        magic_power = True
+                        Magic.images = []
+
+                        magic_img = pygame.image.load("Base pack/buttonRed_pressed.png").convert_alpha()
+                        Magic.images = [magic_img]
+                        Magic.image = pygame.transform.scale(Magic.images[0], (tile_size, tile_size))
+                        Magic.rect = Magic.image.get_rect()
+
+
+
+                        player.images_right = []
+                        player.images_left = []
+                        player.index = 0
+                        player.counter = 0
+                        for num in range(1, 11):
+                            if magic_power == False:
+                                img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
+                            else:
+                                img_right = pygame.image.load(f"Base pack/p3_walk0{num}.png").convert_alpha()
+                            img_right = pygame.transform.scale(img_right, (40, 80))
+                            img_left = pygame.transform.flip(img_right, True, False)
+                            player.images_right.append(img_right)
+                            player.images_left.append(img_left)
+
+            if pygame.key.get_pressed()[pygame.K_SPACE]:
+
+
                 magic_power = False
                 player.images_right = []
                 player.images_left = []
@@ -928,28 +904,74 @@ while run:
                     img_left = pygame.transform.flip(img_right, True, False)
                     player.images_right.append(img_right)
                     player.images_left.append(img_left)
-            else:
-                draw_text("VYHRAL SI!", font, red, (screen_width // 2) - 230, 300)
-                if restart_button.draw():
-                    level = 1
+
+
+
+
+
+            fly_group.draw(screen)
+            enemy2_group.draw(screen)
+            enemy3_group.draw(screen)
+            enemy4_group.draw(screen)
+            ghost_group.draw(screen)
+            platform_group.draw(screen)
+            decoration_group.draw(screen)
+            lava_group.draw(screen)
+            coin_group.draw(screen)
+            exit_group.draw(screen)
+            magic_group.draw(screen)
+            fake_block_group.draw(screen)
+
+            game_over = player.update(game_over)
+
+
+            if game_over == -1:
+               button_used = False
+               magic_power = False
+               death_sound.play()
+               if restart_buttom.draw():
                     world_data = []
                     world = reset_level(level)
                     game_over = 0
-                    score = 0
+                    score -= level_score
+                    level_score = 0
 
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                run = pause(run)
-            if event.key == pygame.K_i:
-                if save_cooldown == 0:
-                    pickle.dump(level, open("saved_level.dat", "wb"))
-                    pickle.dump(score - level_score, open("saved_score.dat", "wb"))
-                    save_cooldown = 100
+            if game_over == 1:
+                button_used = False
+                level += 1
+                if level <= max_levels:
+                    world_data = []
+                    world = reset_level(level)
+                    game_over = 0
+                    level_score = 0
+                    magic_power = False
+                    player.images_right = []
+                    player.images_left = []
+                    player.index = 0
+                    player.counter = 0
+                    for num in range(1, 11):
+                        img_right = pygame.image.load(f"Base pack/p1_walk0{num}.png").convert_alpha()
+                        img_right = pygame.transform.scale(img_right, (40, 80))
+                        img_left = pygame.transform.flip(img_right, True, False)
+                        player.images_right.append(img_right)
+                        player.images_left.append(img_left)
+                else:
+                    draw_text("VYHRAL SI!", font, red, (screen_width // 2) - 200, screen_height // 2)
+                    if restart_buttom.draw():
+                        level = 1
+                        world_data = []
+                        world = reset_level(level)
+                        game_over = 0
+                        score = 0
 
+
+
+
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
 
     pygame.display.update()
 
